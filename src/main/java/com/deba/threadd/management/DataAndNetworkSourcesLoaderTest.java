@@ -1,5 +1,7 @@
 package com.deba.threadd.management;
 
+import java.util.Date;
+
 public class DataAndNetworkSourcesLoaderTest {
 
     public static void main(String[] args) {
@@ -18,5 +20,7 @@ public class DataAndNetworkSourcesLoaderTest {
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
+
+        System.out.printf("Main: Configuration has been loaded: %s\n",new Date());
     }
 }
