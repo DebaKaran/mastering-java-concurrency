@@ -1,5 +1,7 @@
 package com.deba.callable.future;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
@@ -9,16 +11,25 @@ public class FutureCallableDriver {
         ReportServer server = new ReportServer();
 
         // Submit tasks
-        Future<String> f1 = server.submitTask(new ReportTask("Sales Report"));
-        Future<String> f2 = server.submitTask(new ReportTask("Inventory Report"));
-        Future<String> f3 = server.submitTask(new ReportTask("User Report"));
+        List<ReportTask> tasks = List.of(
+                new ReportTask("Sales Report"),
+                new ReportTask("Inventory Report"),
+                new ReportTask("User Report")
+        );
+
+        List<Future<String>> futures = new ArrayList<>();
+
+        // Submit all tasks
+        for (ReportTask task : tasks) {
+            futures.add(server.submitTask(task));
+        }
 
         System.out.println("All reports submitted... doing other work");
 
-        // Get results later
-        System.out.println(f1.get());
-        System.out.println(f2.get());
-        System.out.println(f3.get());
+        // Collect results
+        for (Future<String> future : futures) {
+            System.out.println(future.get());
+        }
 
         server.shutdown();
     }
