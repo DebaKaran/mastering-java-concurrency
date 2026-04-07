@@ -17,12 +17,8 @@ public class FutureCallableDriver {
                 new ReportTask("User Report")
         );
 
-        List<Future<String>> futures = new ArrayList<>();
-
         // Submit all tasks
-        for (ReportTask task : tasks) {
-            futures.add(server.submitTask(task));
-        }
+        List<Future<String>> futures = server.submitAllTasks(tasks);
 
         System.out.println("All reports submitted... doing other work");
 
