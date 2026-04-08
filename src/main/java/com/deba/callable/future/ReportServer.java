@@ -1,24 +1,30 @@
 package com.deba.callable.future;
 
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.util.concurrent.*;
 
 public class ReportServer {
     private ExecutorService service;
+    private CompletionService<String> completionService;
 
     public ReportServer() {
         this.service = Executors.newFixedThreadPool(4);
+        this.completionService = new ExecutorCompletionService<>(service);
 
     }
 
-    public Future<String> submitTask(ReportTask task) {
+    /**public Future<String> submitTask(ReportTask task) {
         return service.submit(task);
+    } */
+
+    public void submitAllTasks(List<ReportTask> tasks) {
+        for (ReportTask task : tasks) {
+            completionService.submit(task);
+        }
     }
 
-    public List<Future<String>> submitAllTasks(List<ReportTask> tasks) throws InterruptedException {
-        return service.invokeAll(tasks);
+    public Future<String> takeResult() throws InterruptedException {
+        return completionService.take(); // waits for NEXT completed task
     }
 
     public void shutdown() {
