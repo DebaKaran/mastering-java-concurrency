@@ -36,7 +36,7 @@ public class RecursiveActionTest {
 
         for (int i=0; i<products.size(); i++){
             Product product=products.get(i);
-            if (product.getPrice()!=12) {
+            if (product.getPrice()- 12 > 0.001) {
                 System.out.printf("Product %s: %f\n",product.
                         getName(),product.getPrice());
             }
