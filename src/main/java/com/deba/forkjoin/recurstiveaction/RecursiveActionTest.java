@@ -1,39 +1,30 @@
 package com.deba.forkjoin.recurstiveaction;
 
 import java.util.List;
-import java.util.concurrent.ForkJoinPool;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 public class RecursiveActionTest {
     public static void main(String[] args) {
         ProductListGenerator generator = new ProductListGenerator();
-        final List<Product> products = generator.generateProductList(100000);
+        final List<Product> products = generator.generateProductList(10000000);
 
         Task task = new Task(products, 0, products.size(), 0.20);
 
         ForkJoinPool pool = new ForkJoinPool();
         pool.execute(task);
 
-        Thread monitor = new Thread(() -> {
-            while (!task.isDone()) {
-                System.out.printf("Main: Thread Count: %d\n",pool.
-                        getActiveThreadCount());
-                System.out.printf("Main: Thread Steal: %d\n",pool.
-                        getStealCount());
-                System.out.printf("Main: Parallelism: %d\n",pool.
-                        getParallelism());
-                try {
-                    TimeUnit.MILLISECONDS.sleep(5);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        });
+        ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
-        monitor.start();
+        ScheduledFuture<?> monitor = scheduler.scheduleAtFixedRate(() -> {
+            System.out.printf("Main: Thread Count: %d\n", pool.getActiveThreadCount());
+            System.out.printf("Main: Thread Steal: %d\n", pool.getStealCount());
+            System.out.printf("Main: Parallelism: %d\n", pool.getParallelism());
+        }, 0, 5, TimeUnit.MILLISECONDS);
 
         pool.invoke(task);   // main thread blocks efficiently
 
+        monitor.cancel(true);      // stop repeating task
+        scheduler.shutdown();      // shutdown scheduler
         pool.shutdown();
 
         if (task.isCompletedNormally()){
