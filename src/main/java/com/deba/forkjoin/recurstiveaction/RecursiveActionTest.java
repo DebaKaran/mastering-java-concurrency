@@ -11,7 +11,6 @@ public class RecursiveActionTest {
         Task task = new Task(products, 0, products.size(), 0.20);
 
         ForkJoinPool pool = new ForkJoinPool();
-        pool.execute(task);
 
         ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
@@ -19,7 +18,7 @@ public class RecursiveActionTest {
             System.out.printf("Main: Thread Count: %d\n", pool.getActiveThreadCount());
             System.out.printf("Main: Thread Steal: %d\n", pool.getStealCount());
             System.out.printf("Main: Parallelism: %d\n", pool.getParallelism());
-        }, 0, 5, TimeUnit.MILLISECONDS);
+        }, 0, 500, TimeUnit.MILLISECONDS);
 
         pool.invoke(task);   // main thread blocks efficiently
 
