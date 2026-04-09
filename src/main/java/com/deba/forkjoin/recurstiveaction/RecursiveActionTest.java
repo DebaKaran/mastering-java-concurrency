@@ -7,26 +7,32 @@ import java.util.concurrent.TimeUnit;
 public class RecursiveActionTest {
     public static void main(String[] args) {
         ProductListGenerator generator = new ProductListGenerator();
-        final List<Product> products = generator.generateProductList(100);
+        final List<Product> products = generator.generateProductList(100000);
 
         Task task = new Task(products, 0, products.size(), 0.20);
 
         ForkJoinPool pool = new ForkJoinPool();
         pool.execute(task);
 
-        do {
-            System.out.printf("Main: Thread Count: %d\n",pool.
-                    getActiveThreadCount());
-            System.out.printf("Main: Thread Steal: %d\n",pool.
-                    getStealCount());
-            System.out.printf("Main: Parallelism: %d\n",pool.
-                    getParallelism());
-            try {
-                TimeUnit.MILLISECONDS.sleep(5);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+        Thread monitor = new Thread(() -> {
+            while (!task.isDone()) {
+                System.out.printf("Main: Thread Count: %d\n",pool.
+                        getActiveThreadCount());
+                System.out.printf("Main: Thread Steal: %d\n",pool.
+                        getStealCount());
+                System.out.printf("Main: Parallelism: %d\n",pool.
+                        getParallelism());
+                try {
+                    TimeUnit.MILLISECONDS.sleep(5);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
-        } while (!task.isDone());
+        });
+
+        monitor.start();
+
+        pool.invoke(task);   // main thread blocks efficiently
 
         pool.shutdown();
 
